@@ -1,7 +1,7 @@
 class Solution {
 public:
     void reorderList(ListNode* head) {
-        
+
         if (!head || !head->next) return;
 
         deque<ListNode*> dq;
@@ -13,24 +13,28 @@ public:
         }
 
         ListNode* dummy = new ListNode(0);
-        ListNode* temp = dummy;
+        curr = dummy;
+
+        bool takeFront = true;
 
         while (!dq.empty()) {
-            ListNode* front = dq.front();
-            dq.pop_front();
 
-            temp->next = front;
-            temp = temp->next;
-
-            if (!dq.empty()) {
+            if(takeFront){
+                ListNode* front = dq.front();
+                dq.pop_front();
+                curr->next = front;
+            }else{
                 ListNode* back = dq.back();
                 dq.pop_back();
-                temp->next = back;
-                temp = temp->next;
+                curr->next = back;
             }
+            
+            curr = curr->next;
+            takeFront = !takeFront;
+
         }
 
-        temp->next = nullptr;   
+        curr->next = nullptr;   
 
         head = dummy->next;
         delete dummy;
