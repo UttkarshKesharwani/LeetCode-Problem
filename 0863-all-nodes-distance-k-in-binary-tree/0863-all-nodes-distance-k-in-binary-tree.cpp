@@ -9,75 +9,67 @@
  */
 class Solution {
 public:
-    unordered_map<TreeNode*,TreeNode*> makeParentPointer(TreeNode* root){
+
+    vector<list<int>> graph;
+
+    void addEdge(int src, int dest ,bool bi_dir=true){
+        graph[src].push_back(dest);
+        if(bi_dir){
+            graph[dest].push_back(src);
+        }
+    }
+
+    void makeGraph(TreeNode* root){
 
         queue<pair<TreeNode*,TreeNode*>> q;
-        unordered_map<TreeNode*,TreeNode*> parent; // <currNode,itsParent>
-
-        q.push({root,NULL});
+        q.push({root,NULL});  // case to handle
 
         while(!q.empty()){
 
-            int n=q.size();
+            int n = q.size();
 
             for(int i=0;i<n;i++){
 
-                auto const [currNode , itsParent] = q.front();
+                const auto [currNode, itsParent] = q.front();
                 q.pop();
-                parent[currNode] = itsParent;
+
+                if(itsParent != NULL) addEdge(currNode->val,itsParent->val);
 
                 if(currNode->left) q.push({currNode->left,currNode});
                 if(currNode->right) q.push({currNode->right,currNode});
-                
+
             }
         }
-
-        return parent;
     }
 
     vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+
         vector<int> ans;
+        graph.resize(10005); 
+        makeGraph(root);
 
-        unordered_map<TreeNode*,TreeNode*> parent = makeParentPointer(root) ; 
-
-      
-        queue<pair<TreeNode*,int>> q; // <node,itsCurrentLevel>
-        q.push({target,0});
-
-        unordered_set<int> visited;  // track whether the immideate neighbour is processed or not
+        // bfs traversal starts form here 
+        queue<pair<int,int>> q;
+        unordered_set<int> visited;
+        q.push({target->val,0});
         visited.insert(target->val);
 
         while(!q.empty()){
 
-            int n=q.size();
+            const auto [currNode,currLevel]  = q.front();
+            q.pop();
 
-            for(int i=0;i<n;i++){
-
-                auto const [currNode,currLevel] = q.front();
-                q.pop();
-
-                cout<<currNode->val<<" ";
-
-                if(currLevel == k){
-                    ans.push_back(currNode->val);
-                    continue;
-                }
-
-                if(currNode->left && !visited.count(currNode->left->val)){
-                    q.push({currNode->left,currLevel+1});
-                    visited.insert(currNode->left->val);
-                }
-                if(currNode->right && !visited.count(currNode->right->val)){
-                    q.push({currNode->right,currLevel+1});
-                    visited.insert(currNode->right->val);
-                }
-                if(parent[currNode] && !visited.count(parent[currNode]->val) ){
-                    q.push({parent[currNode],currLevel+1});
-                    visited.insert(parent[currNode]->val);
-                }
-            
+            if(currLevel == k){
+                ans.push_back(currNode);
+                continue;
             }
-           
+            
+            for(auto neigh : graph[currNode]){
+                if(not visited.count(neigh)){
+                    q.push({neigh,currLevel+1});
+                    visited.insert(neigh);
+                }
+            }   
         }
 
         return ans;
