@@ -1,15 +1,13 @@
 class Solution {
 public:
-    vector<list<int>> graph;
 
-    void addEdge(int src, int dest , bool bi_dir=true){
-        graph[src].push_back(dest);
-        if(bi_dir) graph[dest].push_back(src);
-    }
+    pair<TreeNode*,unordered_map<TreeNode*,TreeNode*>> makeParentPointer(TreeNode* root,int target){
 
-    void makeGraph(TreeNode* root){
+        queue<pair<TreeNode*,TreeNode*>> q; // <currNode,itsParent>
+        unordered_map<TreeNode*,TreeNode*> mp;  // <currNode,itsParent>
 
-        queue<pair<TreeNode* , TreeNode*>> q;
+        TreeNode* targetRoot = NULL;
+
         q.push({root,NULL});
 
         while(!q.empty()){
@@ -18,52 +16,65 @@ public:
 
             for(int i=0;i<n;i++){
 
-                auto const [currNode,itsParent] = q.front();
+                auto const [currNode, itsParent] = q.front();
                 q.pop();
 
-                if(itsParent != NULL) addEdge(currNode->val,itsParent->val);
+                if(currNode->val == target){
+                    targetRoot = currNode;
+                }
+
+                mp[currNode] = itsParent;
 
                 if(currNode->left) q.push({currNode->left,currNode});
                 if(currNode->right) q.push({currNode->right,currNode});
                 
             }
         }
+
+        return {targetRoot,mp};
     }
 
     int amountOfTime(TreeNode* root, int start) {
 
-        graph.resize(100000 + 5);
-        makeGraph(root);
+        pair<TreeNode*,unordered_map<TreeNode* ,TreeNode*>> p = makeParentPointer(root,start);
 
-        // bfs start from here
-        int time = 0;
-        queue<int> q;
+        TreeNode* targetRoot = p.first;
+        unordered_map<TreeNode* ,TreeNode*> parent = p.second;
+
         unordered_set<int> visited;
+        queue<TreeNode*> q;
 
-        q.push(start);
-        q.push(-1);
-        visited.insert(start);
+        q.push(targetRoot);
+        visited.insert(targetRoot->val);
 
+        int time = 0;
 
         while(!q.empty()){
-            int curr = q.front();
-            q.pop();
-            if(curr == -1){
-                if(!q.empty()){
-                    q.push(-1);
+            int n=q.size();
+            for(int i=0;i<n;i++){
+                auto currNode = q.front();
+                q.pop();
+
+                if(currNode->left && !visited.count(currNode->left->val)){
+                    q.push(currNode->left);
+                    visited.insert(currNode->left->val);
                 }
-                time++;
-            }
-            else{
-                for(auto neigh : graph[curr]){
-                    if(not visited.count(neigh)){
-                        q.push(neigh);
-                        visited.insert(neigh);
-                    }
+                if(currNode->right && !visited.count(currNode->right->val)){
+                    q.push(currNode->right);
+                    visited.insert(currNode->right->val);
                 }
+                if(parent[currNode] && !visited.count(parent[currNode]->val)){  // make sure there is parent , edge case -> for root the parent is NULL
+                    q.push(parent[currNode]);
+                    visited.insert(parent[currNode]->val);
+                }
+
             }
-        }
+
+            time++;
+
+        }       
         
+
         return time-1;
     }
 };
