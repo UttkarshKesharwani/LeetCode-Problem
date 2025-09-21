@@ -2,44 +2,27 @@
 class Solution {
 public:
 
-    int totalNodes=0;
+    int count=0;
 
-    // for every nodes we are computing the average of its subtree
-    pair<int,int> returnAverageOfSubtree(TreeNode* root){
+    pair<int,int> solve(TreeNode* root){
 
-        queue<TreeNode*> q;
-        q.push(root);
-
-        int totalSum = 0;
-        int countNodes = 0;
-
-        while(!q.empty()){
-            int n=q.size();
-            for(int i=0;i<n;i++){
-                auto currNode = q.front();
-                q.pop();
-
-                totalSum += currNode->val;
-                countNodes++;
-
-                if(currNode->left) q.push(currNode->left);
-                if(currNode->right) q.push(currNode->right);
-            }
+        if(root == NULL){
+            return {0,0};  // {totalSum,totalNodes}
         }
-        
-        return {root->val,totalSum/countNodes};
-    }
 
-    void preOrder(TreeNode* root){
-        if(root==NULL) return;
-        preOrder(root->left);
-        auto [rootVal,average] = returnAverageOfSubtree(root);
-        if(rootVal==average) totalNodes++;
-        preOrder(root->right);
-    }
+        pair<int,int> p1 = solve(root->left);
+        pair<int,int> p2 = solve(root->right);
 
+        int totalSum = p1.first + p2.first + root->val;
+        int totalNodes = p1.second + p2.second + 1;
+
+        if(totalSum/totalNodes == root->val) count++;
+
+        return {totalSum,totalNodes};
+    } 
+    
     int averageOfSubtree(TreeNode* root) {
-        preOrder(root);
-        return totalNodes;
+        solve(root);
+        return count;
     }
 };
