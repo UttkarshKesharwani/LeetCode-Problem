@@ -1,20 +1,22 @@
 
 class Solution {
 public:
-    // here t.c = O(n) ans s.c=O(n);
-    void inorder(TreeNode* root , vector<int> &ans){
-        if(root==NULL) return ;
-        inorder(root->left,ans);
-        ans.push_back(root->val);
-        inorder(root->right,ans);
 
+    bool isValid = true;
+    long long prev = LLONG_MIN; // because in que node can be INT_MIN
+
+    void inOrder(TreeNode* root){ // since inorder of BST is always sorted(do inorder and on the go check whether the curr value of node is smaller, if yes then it will not valid BST)
+        if(root == NULL) return ;
+        inOrder(root->left);
+        if(root->val > prev){
+            prev = root->val;
+        }else{
+            isValid = false;
+        }
+        inOrder(root->right);
     }
     bool isValidBST(TreeNode* root) {
-        vector <int> ans;
-        inorder(root,ans);
-        for(int i=1;i<ans.size();i++){
-            if(ans[i]<=ans[i-1]) return false;
-        }
-        return true;
+        inOrder(root);
+        return isValid; 
     }
 };
