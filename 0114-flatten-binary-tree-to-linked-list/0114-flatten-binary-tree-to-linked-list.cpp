@@ -1,24 +1,31 @@
+
 class Solution {
 public:
-
-    vector<TreeNode*> ans;
-
-    void preOrder(TreeNode* root){
-        if(root==NULL) return;
-        ans.push_back(root);
-        preOrder(root->left);
-        preOrder(root->right);
-    }
-
     void flatten(TreeNode* root) {
-        if(!root) return;
 
-        ans.clear();
-        preOrder(root);
+        TreeNode* curr = root;
 
-        for(int i=1;i<ans.size();i++){
-            ans[i-1]->right = ans[i];
-            ans[i-1]->left = NULL;
+        // with help of modified morris traversal
+        while(curr!=NULL){
+
+            if(curr->left!=NULL){
+
+                TreeNode* pred = curr->left;
+                TreeNode* rootOfRST = curr->right;  // root node of right sub tree
+                
+                while(pred->right!=NULL){
+                    pred = pred->right;
+                }
+
+                pred->right = rootOfRST;
+                curr->right = curr->left;
+                curr->left = NULL;
+                curr = curr->right;
+
+            }else{
+                curr = curr->right;
+            }
         }
+
     }
 };
