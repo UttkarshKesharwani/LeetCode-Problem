@@ -21,31 +21,43 @@
  */
 class Solution {
 public:
-    vector<int> ans;
-    
-    void traveseLL(ListNode* head){
-        while(head){
-            ans.push_back(head->val);
-            head = head->next;
+
+    pair<ListNode*,ListNode*> findMiddleNode(ListNode* head){
+
+        ListNode* slow = head;
+        ListNode* fast = head;
+
+        ListNode* prevSlow = NULL;
+
+        while(fast and fast->next){
+            prevSlow = slow;
+            slow=slow->next;
+            fast=fast->next->next;
         }
+
+        return {slow,prevSlow};
     }
 
-    TreeNode* buildTree(vector<int>& arr,int low ,int high){
+    TreeNode* buildTree(ListNode* head){
 
-        if(low>high) return NULL;
+        if(!head) return NULL; // empty linked list
 
-        int mid = low + (high-low)/2;
-        TreeNode* root = new TreeNode(arr[mid]);
+        auto [mid,prev] = findMiddleNode(head);
+    
+        if(prev == NULL) { // Only one node in the list
+            return new TreeNode(mid->val);
+        }
 
-        root->left = buildTree(arr,low,mid-1);
-        root->right = buildTree(arr,mid+1,high);
+        prev->next = NULL;  // Split the list
+        TreeNode* root = new TreeNode(mid->val);
+        
+        root->left = buildTree(head);
+        root->right = buildTree(mid->next);
 
         return root;
-    }
+    }   
 
     TreeNode* sortedListToBST(ListNode* head) {
-        ans.clear();
-        traveseLL(head);
-        return buildTree(ans,0,ans.size()-1);
+        return buildTree(head);        
     }
 };
